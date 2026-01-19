@@ -19,6 +19,19 @@ services:
     networks:
       - app-network
 
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: llm-gateway-dashboard
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
+    networks:
+      - app-network
+
   db:
     image: postgres:15-alpine
     container_name: llm-gateway-db
@@ -39,6 +52,7 @@ services:
 
 volumes:
   postgres_data:
+
 
 networks:
   app-network:
