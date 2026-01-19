@@ -16,8 +16,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
-              networks:
+    networks:
       - app-network
 
   db:
@@ -35,13 +34,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-            networks:
+    networks:
       - app-network
 
 volumes:
   postgres_data:
 
-  networks:
+networks:
   app-network:
     driver: bridge
