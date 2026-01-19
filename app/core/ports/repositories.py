@@ -1,4 +1,4 @@
-from typing import Protocol, List, Optional
+from typing import Protocol, List, Optional, Dict, Any
 from uuid import UUID
 from app.core.domain.project import Project
 from app.core.domain.request_log import RequestLog
@@ -16,6 +16,12 @@ class ProjectRepository(Protocol):
     def save(self, project: Project) -> Project:
         ...
 
+    def list_all(self) -> List[Project]:
+        ...
+
+    def delete(self, project_id: UUID) -> bool:
+        ...
+
 class LogRepository(Protocol):
     """Interface for RequestLog persistence."""
     
@@ -23,6 +29,10 @@ class LogRepository(Protocol):
         ...
         
     def get_by_project(self, project_id: UUID, limit: int = 100) -> List[RequestLog]:
+        ...
+
+    def get_global_stats(self) -> Dict[str, Any]:
+        """Aggregate stats across all projects."""
         ...
 
 class ModelExposureRepository(Protocol):

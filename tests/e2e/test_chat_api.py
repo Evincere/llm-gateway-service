@@ -27,3 +27,28 @@ def test_chat_endpoint_valid_auth(client: TestClient, mock_project: Project):
         
         assert response.status_code == 200
         assert response.json()["choices"][0]["message"]["content"] == "response"
+
+def test_stream_chat_valid_auth(client: TestClient, mock_project: Project):
+    # Mock the LLM adapter to avoid real network calls
+    with patch("app.entrypoints.api.chat_router.OllamaFreeAPIAdapter") as mock_adapter_class:
+        mock_adapter = mock_adapter_class.return_value
+        # Mocking a generator for the stream
+        def mock_stream(**kwargs):
+            yield {"message": {"content": "Hello"}}
+            yield {"message": {"content": " friend"}}
+            
+        mock_adapter.stream_chat.side_effect = mock_stream
+        
+        response = client.post(
+            "/v1/chat/stream",
+            json={"model": "llama3", "messages": [{"role": "user", "content": "hi"}]},
+            headers={"X-API-Key": mock_project.api_key}
+        )
+        
+        assert response.status_code == 200
+        assert response.headers["content-type"] == "text/event-stream; charset=utf-8"
+        
+        content = response.content.decode("utf-8")
+        assert 'data: {"message": {"content": "Hello"}}' in content
+        assert 'data: {"message": {"content": " friend"}}' in content
+        assert 'data: [DONE]' in content

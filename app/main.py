@@ -29,7 +29,7 @@ app = FastAPI(
 # Add Middleware
 app.add_middleware(RequestLoggingMiddleware)
 
-from app.entrypoints.api import chat_router, models_router
+from app.entrypoints.api import chat_router, models_router, admin_router
 
 # Configure CORS
 app.add_middleware(
@@ -43,6 +43,7 @@ app.add_middleware(
 # Include routers
 app.include_router(chat_router.router)
 app.include_router(models_router.router)
+app.include_router(admin_router.router)
 
 
 @app.get("/")
