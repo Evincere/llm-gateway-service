@@ -18,6 +18,14 @@ services:
         condition: service_healthy
     networks:
       - app-network
+          labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway-api.rule=Host(`149.50.132.23`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.gateway-api.entrypoints=web"
+      - "traefik.http.services.gateway-api.loadbalancer.server.port=8000"
+      - "traefik.http.middlewares.gateway-api-stripprefix.stripprefix.prefixes=/api"
+            - "traefik.http.routers.gateway-api.middlewares=gateway-api-stripprefix"
+      - "traefik.http.routers.gateway-api.priority=2"
 
   dashboard:
     build:
@@ -31,6 +39,12 @@ services:
       - app
     networks:
       - app-network
+          labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway-dashboard.rule=Host(`149.50.132.23`)"
+      - "traefik.http.routers.gateway-dashboard.entrypoints=web"
+      - "traefik.http.routers.gateway-dashboard.priority=1"
+      - "traefik.http.services.gateway-dashboard.loadbalancer.server.port=80"
 
   db:
     image: postgres:15-alpine
