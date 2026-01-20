@@ -7,18 +7,28 @@ services:
     restart: always
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/llmgateway
-      - OLLAMA_BASE_URL=http://your-ollama-vps-ip:11434
+            - OLLAMA_BASE_URL=https://ollama.com
+      - OLLAMA_API_KEY=20140bd21c9547419f44ca11b441626c.946JAXVascA4mx_30qzkj7oZ
+      - OLLAMA_API_URL=https://ollama.com/api/chat
+      - OLLAMA_MODEL=gpt-oss:120b
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
     ports:
-      - "3001:8000"
+      - "8000:8000"
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     networks:
       - app-network
-
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway-api.rule=Host(`149.50.132.23`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.gateway-api.entrypoints=web"
+      - "traefik.http.services.gateway-api.loadbalancer.server.port=8000"
+      - "traefik.http.middlewares.gateway-api-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.gateway-api.middlewares=gateway-api-stripprefix"
+      - "traefik.http.routers.gateway-api.priority=2"
+  
   dashboard:
     build:
       context: ./dashboard
@@ -26,11 +36,17 @@ services:
     container_name: llm-gateway-dashboard
     restart: always
     ports:
-      - "8080:80"
+    -       "8081:80"
     depends_on:
       - app
     networks:
-      - app-network
+      - 8080-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.gateway-dashboard.rule=Host(`149.50.132.23`)"
+      - "traefik.http.routers.gateway-dashboard.entrypoints=web"
+      - "traefik.http.routers.gateway-dashboard.priority=1"
+      - "traefik.http.services.gateway-dashboard.loadbalancer.server.port=80"
 
   db:
     image: postgres:15-alpine
@@ -43,7 +59,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d llmgateway" ]
+      test: ["CMD-SHELL", "pg_isready -U user -d llmgateway"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -53,7 +69,8 @@ services:
 volumes:
   postgres_data:
 
-
 networks:
   app-network:
+    driver: bridge
+  8080-network:
     driver: bridge
