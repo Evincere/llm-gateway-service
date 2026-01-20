@@ -7,7 +7,10 @@ services:
     restart: always
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/llmgateway
-      - OLLAMA_BASE_URL=http://your-ollama-vps-ip:11434
+            - OLLAMA_BASE_URL=https://ollama.com
+      - OLLAMA_API_KEY=20140bd21c9547419f44ca11b441626c.946JAXVascA4mx_30qzkj7oZ
+      - OLLAMA_API_URL=https://ollama.com/api/chat
+      - OLLAMA_MODEL=gpt-oss:120b
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
