@@ -14,7 +14,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-    - db
+      - db
     networks:
       - app-network
     labels:
@@ -23,9 +23,9 @@ services:
       - "traefik.http.routers.gateway-api.entrypoints=web"
       - "traefik.http.services.gateway-api.loadbalancer.server.port=8000"
       - "traefik.http.middlewares.gateway-api-stripprefix.stripprefix.prefixes=/api"
-            - "traefik.http.routers.gateway-api.middlewares=gateway-api-stripprefix"
+      - "traefik.http.routers.gateway-api.middlewares=gateway-api-stripprefix"
       - "traefik.http.routers.gateway-api.priority=2"
-
+  
   dashboard:
     build:
       context: ./dashboard
@@ -33,11 +33,12 @@ services:
     container_name: llm-gateway-dashboard
     restart: always
     ports:
-      - "8080:80"    depends_on:
+      - "8080:80"
+    depends_on:
       - app
     networks:
       - 8080-network
-          labels:
+    labels:
       - "traefik.enable=true"
       - "traefik.http.routers.gateway-dashboard.rule=Host(`149.50.132.23`)"
       - "traefik.http.routers.gateway-dashboard.entrypoints=web"
@@ -55,7 +56,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U user -d llmgateway" ]
+      test: ["CMD-SHELL", "pg_isready -U user -d llmgateway"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -64,7 +65,6 @@ services:
 
 volumes:
   postgres_data:
-
 
 networks:
   app-network:
